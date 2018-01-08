@@ -1,6 +1,6 @@
 "use strict";
 
-const fbURL = "https://class-demo-project.firebaseio.com";
+const fbURL = "https://class-demo-project.firebaseio.com/";
 
 // firebase module
 function getCats() {
@@ -46,6 +46,23 @@ function deleteCat(id) {
   });
 }
 
+function getCustomers() {
+  return new Promise((resolve, reject) => {
+    $.ajax({
+      url: `https://class-demo-project.firebaseio.com/customers.json`
+    })
+    .done(custs => {
+      console.log(custs);
+      resolve(custs);
+    })
+    .fail(error => {
+      console.log("uh-oh", error.statusText);
+      reject(error);
+    });
+  });
+}
+getCustomers();
+
 function addCustomer(newCustomer) {
   return new Promise((resolve, reject) => {
     $.ajax({
@@ -58,16 +75,25 @@ function addCustomer(newCustomer) {
   });
 }
 
-function getActiveCustomers() {
+function deleteCustomer(id) {
   return new Promise((resolve, reject) => {
     $.ajax({
-      url: `https://class-demo-project.firebaseio.com/customers.json?orderBy="name"&equalTo=true`
-    }).done(activeCusts => {
-      console.log(activeCusts);
+      url: `https://class-demo-project.firebaseio.com/customers/${id}.json`,
+      method: "DELETE"
+    })
+    .done(data => {
+      resolve(data);
+    })
+    .fail(error => {
+      console.log('uh-oh', error.statusText);
+      reject(error);
     });
   });
 }
-getActiveCustomers();
+
+
+
+
 
 // end of FB module
 
@@ -83,7 +109,7 @@ function listCats(catData) {
   $("#categories").html("");
   catsArr.forEach(cat => {
     $("#categories").append(
-      `<h3>${cat.name}</h3>
+      `<h4>${cat.name}</h4>
       <input type="text" class="catForm" placeholder="description">
       <button id="${cat.id}" class="updateCat">updateCat</button>
         <button id="${
@@ -113,6 +139,16 @@ $(document).on("click", ".deleteCat", function() {
     });
 });
 
+$(document).on("click", ".updateCat", function(){
+  console.log('updateCat clicked');
+
+  let id = $(this).attr("id");
+  updateCat(id, $(this).prev(".catForm").val());
+});
+
+///////////////////////////////////////
+
+
 $("#addCustomer").click(function() {
   console.log("addCust called");
 
@@ -125,9 +161,31 @@ $("#addCustomer").click(function() {
   addCustomer(custObj);
 });
 
-$(document).on("click", ".updateCat", function(){
-  console.log('updateCat clicked');
 
-  let id = $(this).attr("id");
-  updateCat(id, $(this).prev(".catForm").val());
+
+function listCusts(custData) {
+  console.log("custs", custData);
+  let custArr = [];
+  let keys = Object.keys(custData);
+  keys.forEach(key => {
+    custData[key].id = key;
+    custArr.push(custData[key]);
+  });
+  console.log(custArr);
+  $("#customers").html("");
+  custArr.forEach(cust => {
+    $("#customers").append(
+      `<h4>${cust.name}</h4>
+      <input type="text" class="custForm" placeholder="description">
+      <button id="${cust.id}" class="updateCust">updateCust</button>
+        <button id="${
+          cust.id
+        }" class="deleteCust">delete</button>`
+    );
+  });
+}
+
+getCustomers().then(custData => {
+  listCusts(custData);
 });
+
