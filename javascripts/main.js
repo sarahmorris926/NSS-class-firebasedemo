@@ -175,12 +175,7 @@ function listCusts(custData) {
   $("#customers").html("");
   custArr.forEach(cust => {
     $("#customers").append(
-      `<h4>${cust.name}</h4>
-      <input type="text" class="custForm" placeholder="description">
-      <button id="${cust.id}" class="updateCust">updateCust</button>
-        <button id="${
-          cust.id
-        }" class="deleteCust">delete</button>`
+      `<h4>${cust.name}</h4><button id="${cust.id}" class="deleteCust">delete</button>`
     );
   });
 }
@@ -188,4 +183,22 @@ function listCusts(custData) {
 getCustomers().then(custData => {
   listCusts(custData);
 });
+
+$(document).on("click", ".deleteCust", function() {
+  let custId = $(this).attr("id");
+  console.log("custId", custId);
+  deleteCustomer(custId)
+    .then(() => {
+      alert("Customer deleted");
+      return getCustomers();
+    })
+    .then(custs => {
+      listCusts(custs);
+    })
+    .catch(err => {
+      console.log("oops", err);
+    });
+});
+
+
 
